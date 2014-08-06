@@ -6,6 +6,7 @@ namespace SimpleApp.Data.Service
     using SimpleApp.Data.Entities;
     using SimpleApp.Data.Extension;
     using SimpleApp.Data.Service.Interface;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Data;
@@ -41,10 +42,28 @@ namespace SimpleApp.Data.Service
             {
                 IList<TestUser> users = context.TestUsers.ToList();
 
-                return users.ToDataTable<TestUser>();
+                DataTable dt = users.ToDataTable<TestUser>();
+
+                dt.Columns.Add("Age", typeof(int));
+
+                foreach (DataRow row in dt.Rows) 
+                {
+                    int Age = this.CalculateAge((DateTime) row["DateOfBirth"]);
+                    row["Age"] = Age;
+                }
+
+                return dt;
             }
         }
 
+        private int CalculateAge(DateTime bday) {
+
+            DateTime today = DateTime.Today;
+            int age = today.Year - bday.Year;
+            if (bday > today.AddYears(-age)) age--;
+
+            return age;
+        }
         
         /// <summary>
         /// Service method to create new user
